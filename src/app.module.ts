@@ -6,6 +6,7 @@ import { PrismaService } from './services/prisma.service';
 import { RedisService } from './services/redis/redis.service';
 import nodeConfig from './configs/node.config';
 import { RedisProvider } from './services/redis/redis.provider';
+import { ShortenerService } from './services/shortener.service';
 import redisConfig from './configs/redis.config';
 
 @Module({
@@ -22,6 +23,7 @@ import redisConfig from './configs/redis.config';
     PrismaService,
     RedisService,
     RedisProvider,
+    ShortenerService,
   ],
 })
 export class AppModule {}

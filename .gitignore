@@ -36,3 +36,6 @@ lerna-debug.log*
 
 # dotenv
 .env
+
+# Database
+/prisma/migrations
