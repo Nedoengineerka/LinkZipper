@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from './services/prisma.service';
 import { RedisService } from './services/redis/redis.service';
 import { RedisKey } from 'ioredis';
@@ -41,6 +41,28 @@ export class AppService {
       await this.redisService.set(shortURL, originalURL);
 
       return shortURL;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getOriginalURL(shortURL: string): Promise<string | null> {
+    try {
+      // Check if the url has already been saved
+      const originalURLRedis = await this.redisService.get(shortURL);
+      if (originalURLRedis) return originalURLRedis;
+
+      const originalURL_DB = await this.prismaService.uRL.findUnique({
+        where: {
+          shortURL,
+        },
+      });
+      if (originalURL_DB) return originalURL_DB.shortURL;
+
+      throw new HttpException(
+        `The url ${shortURL} does not exist.`,
+        HttpStatus.NOT_FOUND,
+      );
     } catch (err) {
       throw err;
     }
