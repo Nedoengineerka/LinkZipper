@@ -6,12 +6,13 @@ import { PrismaService } from './services/prisma.service';
 import { RedisService } from './services/redis/redis.service';
 import nodeConfig from './configs/node.config';
 import { RedisProvider } from './services/redis/redis.provider';
+import redisConfig from './configs/redis.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       expandVariables: true,
-      load: [nodeConfig],
+      load: [nodeConfig, redisConfig],
     }),
   ],
   controllers: [AppController],
