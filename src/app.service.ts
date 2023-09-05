@@ -32,11 +32,13 @@ export class AppService {
       const shortURL: RedisKey = this.shortenerService.shortenURL(originalURL);
 
       // Saving to Postgres and Redis
-      await this.prismaService.uRL.create({
-        data: {
+      await this.prismaService.uRL.upsert({
+        create: {
           shortURL,
           originalURL,
         },
+        where: { originalURL },
+        update: {},
       });
       await this.redisService.set(shortURL, originalURL);
 
