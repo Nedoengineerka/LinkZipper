@@ -7,13 +7,15 @@ import { RedisService } from './services/redis/redis.service';
 import nodeConfig from './configs/node.config';
 import { RedisProvider } from './services/redis/redis.provider';
 import { ShortenerService } from './services/shortener.service';
+import { CacheService } from './services/cache.service';
 import redisConfig from './configs/redis.config';
+import hostConfig from './configs/host.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       expandVariables: true,
-      load: [nodeConfig, redisConfig],
+      load: [nodeConfig, redisConfig, hostConfig],
     }),
   ],
   controllers: [AppController],
@@ -24,6 +26,7 @@ import redisConfig from './configs/redis.config';
     RedisService,
     RedisProvider,
     ShortenerService,
+    CacheService,
   ],
 })
 export class AppModule {}

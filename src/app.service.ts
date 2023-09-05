@@ -1,72 +1,61 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from './services/prisma.service';
-import { RedisService } from './services/redis/redis.service';
-import { RedisKey } from 'ioredis';
 import { ShortenerService } from './services/shortener.service';
+import { CacheService } from './services/cache.service';
 
 @Injectable()
 export class AppService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly redisService: RedisService,
+    private readonly cacheService: CacheService,
     private readonly shortenerService: ShortenerService,
   ) {}
-  getStart(): string {
-    return 'Welcome to LinkZipper!\nSend a link to /shorten to shorten it or a shortened link to /original to get the original link.';
-  }
 
-  async shortenerURL(originalURL: string): Promise<RedisKey | null> {
-    try {
-      // Check if the url has already been saved
-      const cashedURLRedis = await this.redisService.findByValue(originalURL);
-      if (cashedURLRedis) return cashedURLRedis;
+  async shortenUrl(originalUrl: string): Promise<string> {
+    const cachedUrl = await this.cacheService.get(originalUrl);
+    if (cachedUrl) return cachedUrl;
 
-      const savedURL = await this.prismaService.uRL.findUnique({
-        where: {
-          originalURL,
-        },
-      });
-      if (savedURL) return savedURL.shortURL;
-
-      // URL shortening
-      const shortURL: RedisKey = this.shortenerService.shortenURL(originalURL);
-
-      // Saving to Postgres and Redis
-      await this.prismaService.uRL.upsert({
-        create: {
-          shortURL,
-          originalURL,
-        },
-        where: { originalURL },
-        update: {},
-      });
-      await this.redisService.set(shortURL, originalURL);
-
-      return shortURL;
-    } catch (err) {
-      throw err;
+    const savedUrl = await this.prismaService.url.findUnique({
+      where: {
+        originalUrl,
+      },
+    });
+    if (savedUrl) {
+      this.cacheService.set(savedUrl.shortUrl, originalUrl);
+      return savedUrl.shortUrl;
     }
+
+    const shortUrl = await this.shortenerService.shortenUrl();
+
+    await this.prismaService.url.upsert({
+      create: {
+        shortUrl,
+        originalUrl,
+      },
+      where: { originalUrl },
+      update: {},
+    });
+    this.cacheService.set(shortUrl, originalUrl);
+
+    return shortUrl;
   }
 
-  async getOriginalURL(shortURL: string): Promise<string | null> {
-    try {
-      // Check if the url has already been saved
-      const originalURLRedis = await this.redisService.get(shortURL);
-      if (originalURLRedis) return originalURLRedis;
+  async getOriginalUrl(shortUrl: string): Promise<string | null> {
+    const originalUrlRedis = await this.cacheService.get(shortUrl);
+    if (originalUrlRedis) return originalUrlRedis;
 
-      const originalURL_DB = await this.prismaService.uRL.findUnique({
-        where: {
-          shortURL,
-        },
-      });
-      if (originalURL_DB) return originalURL_DB.shortURL;
-
-      throw new HttpException(
-        `The url ${shortURL} does not exist.`,
-        HttpStatus.NOT_FOUND,
+    const originalUrl_DB = await this.prismaService.url.findUnique({
+      where: {
+        shortUrl,
+      },
+    });
+    if (originalUrl_DB) {
+      this.cacheService.set(
+        originalUrl_DB.shortUrl,
+        originalUrl_DB.originalUrl,
       );
-    } catch (err) {
-      throw err;
+      return originalUrl_DB.shortUrl;
     }
+    return null;
   }
 }

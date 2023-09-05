@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model URL {
-  shortURL String  @unique
-  originalURL String @unique
+model url {
+  shortUrl String  @unique
+  originalUrl String @unique
 }

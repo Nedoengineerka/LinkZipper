@@ -15,26 +15,4 @@ export class RedisService {
   async get(key: RedisKey): Promise<string | null> {
     return await this.redisClient.get(key);
   }
-
-  async findByValue(value: string): Promise<RedisKey | null> {
-    let cursor = '0';
-    do {
-      const [newCursor, keys] = await this.redisClient.scan(
-        cursor,
-        'MATCH',
-        '*',
-        'COUNT',
-        100,
-      );
-      cursor = newCursor;
-      for (const key of keys) {
-        const storedValue = await this.redisClient.get(key);
-
-        if (storedValue === value) {
-          return key;
-        }
-      }
-    } while (cursor !== '0');
-    return null;
-  }
 }

@@ -1,33 +1,32 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Post,
+  UseFilters,
+} from '@nestjs/common';
 import { AppService } from './app.service';
-import { ShortenDTO } from './dtos/shorten.dto';
-import { RedisKey } from 'ioredis';
-import { OriginalDTO } from './dtos/original.dto';
+import { UrlDTO } from './dtos/url.dto';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 @Controller()
 export class AppController {
   constructor(private appService: AppService) {}
 
-  @Get()
-  getStart(): string {
-    return this.appService.getStart();
-  }
-
   @Post('/shorten')
-  async shortenerURL(@Body() url: ShortenDTO): Promise<RedisKey | string> {
-    try {
-      return await this.appService.shortenerURL(url.originalURL);
-    } catch (err) {
-      return err.message;
-    }
+  @UseFilters(new HttpExceptionFilter())
+  shortenUrl(@Body() body: UrlDTO): Promise<string> {
+    return this.appService.shortenUrl(body.url).catch(() => {
+      throw new HttpException('Server internal error. Try later.', 500);
+    });
   }
 
   @Get('/original')
-  async getOriginalURL(@Body() url: OriginalDTO): Promise<string> {
-    try {
-      return await this.appService.getOriginalURL(url.shortURL);
-    } catch (err) {
-      return err.message;
-    }
+  @UseFilters(new HttpExceptionFilter())
+  getOriginalUrl(@Body() body: UrlDTO): Promise<string> {
+    return this.appService.getOriginalUrl(body.url).catch(() => {
+      throw new HttpException('Server internal error. Try later.', 500);
+    });
   }
 }

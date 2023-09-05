@@ -7,10 +7,10 @@ export type RedisClient = Redis;
 
 export const RedisProvider: Provider = {
   useFactory: (configService: ConfigService): RedisClient => {
-    const { redisURL, port } =
+    const { redisUrl, port } =
       configService.get<ConfigType<typeof redisConfig>>('redis');
     return new Redis({
-      host: redisURL,
+      host: redisUrl,
       port: port,
     });
   },
