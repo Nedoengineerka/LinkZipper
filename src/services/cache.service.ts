@@ -5,7 +5,7 @@ import { RedisService } from './redis/redis.service';
 export class CacheService {
   constructor(private readonly redisService: RedisService) {}
 
-  async get(url: string): Promise<string> {
+  async get(url: string): Promise<string | null> {
     return await this.redisService.get(url);
   }
 

@@ -13,7 +13,9 @@ export class AppService {
 
   async shortenUrl(originalUrl: string): Promise<string> {
     const cachedUrl = await this.cacheService.get(originalUrl);
-    if (cachedUrl) return cachedUrl;
+    if (cachedUrl) {
+      return cachedUrl;
+    }
 
     const savedUrl = await this.prismaService.url.findUnique({
       where: {
@@ -54,7 +56,7 @@ export class AppService {
         originalUrl_DB.shortUrl,
         originalUrl_DB.originalUrl,
       );
-      return originalUrl_DB.shortUrl;
+      return originalUrl_DB.originalUrl;
     }
     return null;
   }

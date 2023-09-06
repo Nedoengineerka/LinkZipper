@@ -15,7 +15,7 @@ export class ShortenerService {
   async shortenUrl(): Promise<string> {
     const { host } =
       this.configService.get<ConfigType<typeof hostConfig>>('host');
-    const hashedUrl = this.base62.encode(Buffer.from(uuid.parse(uuid.v4())));
-    return `${host}/${hashedUrl}`;
+    const hashedUuid = this.base62.encode(Buffer.from(uuid.parse(uuid.v4())));
+    return `${host}/${hashedUuid}`;
   }
 }
