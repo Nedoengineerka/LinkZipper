@@ -1,5 +1,12 @@
 # LinkZipper
-Before first start
+This is a link shortening project written on the NestJS/Prisma(Postgres)/Redis stack, where Postgres was used as the main database and Redis as a cache for requests, and a different uid is generated for each link. The entire project is covered by jest and supertest tests. Also PostgresQL and Redis databases are created with docker-compose.
+
+Only two endpoints are used
+- POST /shorten - to shorten the link
+- GET /original - to get the original link by passing the shortened one to the body
+
+
+# Before first start
 
 1) ```sudo docker-compose up -d```
 2) After 10-15 seconds (when the database starts in the container)- ```npm run prisma:migrate```
